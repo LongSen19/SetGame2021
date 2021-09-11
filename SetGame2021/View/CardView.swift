@@ -17,26 +17,30 @@ struct CardView: View {
     }
     
     var body: some View {
-        drawCardView()
+        GeometryReader { geometry in
+            drawCardView(in: geometry.size)
+            .rotationEffect(Angle.degrees(card.status == .misMatched ? 180 : 0))
+            .cardify(of: card, in: geometry.size)
+    }
     }
     
-    func drawCardView() -> some View {
+    func drawCardView(in size: CGSize) -> some View {
         ZStack{
-            RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(.white)
-                .opacity(0.7)
-//            RoundedRectangle(cornerRadius: 10)
-//                .stroke(lineWidth: 3.0)
-//                .foregroundColor(.blue)
             VStack {
-                ForEach(0..<card.quantity.rawValue) { _ in
-                    drawSymbolAndShading()
+                ForEach(0..<numberOfShapes(), id:\.self) { _ in
+                    drawSymbolAndShading(in: size)
+                        .rotationEffect(Angle.degrees(card.status == .matched ? 5*360 : 0))
                 }
             }
+            .rotationEffect(Angle.degrees(card.status == .matched ? 5*360 : 0))
         }
     }
     
-    func drawSymbolAndShading() -> some View {
+    func numberOfShapes() -> Int {
+        return card.quantity.rawValue
+    }
+    
+    func drawSymbolAndShading(in asize: CGSize) -> some View {
         VStack{
             switch card.shading {
             case .open:
@@ -50,15 +54,18 @@ struct CardView: View {
                     .stroke(getColor())
                     .clipShape(Symbol(card.symbol))
             }
+            
         }
         .padding(5)
+        .frame(maxHeight: asize.height/4)
+        .aspectRatio(3, contentMode: .fit)
     }
     
     func getColor() -> Color {
         switch card.color {
         case .blue: return Color.blue
-        case .green: return Color.green
-        case .red: return Color.red
+        case .organe: return Color.orange
+        case .purple: return Color.purple
         }
     }
 }
@@ -105,22 +112,8 @@ struct Symbol: Shape {
         p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
         p.closeSubpath()
         return p
-    
+        
     }
-    
-//    func roundedRectangle(in rect: CGRect) -> Path {
-//
-//        var p = Path()
-//        p.move(to: CGPoint(x: rect.maxX/4, y: rect.midY - rect.midY/8))
-//        p.addLine(to: CGPoint(x: rect.maxX - rect.maxX/4, y: rect.midY - rect.midY/8))
-//        p.move(to: CGPoint(x: rect.maxX/4, y: rect.midY + rect.midY/8))
-//        p.addLine(to: CGPoint(x: rect.maxX - rect.maxX/4, y: rect.midY + rect.midY/8))
-//        p.addArc(center: CGPoint(x: rect.maxX/4, y: rect.midY), radius: rect.midY/8, startAngle: .degrees(90), endAngle: .degrees(270), clockwise: false)
-//        p.addArc(center: CGPoint(x: rect.maxX - rect.maxX/4, y: rect.midY), radius: rect.midY/8, startAngle: .degrees(270), endAngle: .degrees(90), clockwise: false)
-//
-//        return p
-//
-//    }
     
     func roundedRectangle(in rect: CGRect) -> Path {
         var p = Path()
@@ -137,10 +130,10 @@ struct Stripped: Shape {
         var currentStripOrigin = CGPoint(x: rect.minX, y: rect.minY)
         while rect.contains(currentStripOrigin) {
             p.move(to: currentStripOrigin)
-
+            
             p.addLine(to: CGPoint(x: currentStripOrigin.x, y: rect.maxY))
             currentStripOrigin.x += 4
-           // p.move(to: currentStripOrigin)
+            // p.move(to: currentStripOrigin)
         }
         return p
     }
@@ -150,7 +143,7 @@ struct Stripped: Shape {
 
 struct CardView_Previews: PreviewProvider {
     static var previews: some View {
-        let card = Card(shading: .stripped, symbol: .roundedRectangle, color: .blue, quantity: .one)
+        let card = Card(shading: .solid, symbol: .roundedRectangle, color: .blue, quantity: .two)
         CardView(card)
     }
 }

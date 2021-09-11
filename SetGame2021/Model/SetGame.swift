@@ -12,7 +12,7 @@ class SetGame: ObservableObject {
     @Published private var model = SetEngine()
     
     init() {
-        model.startGame()
+        model.setUpDeck()
     }
     
     var deck: [Card] {
@@ -23,13 +23,29 @@ class SetGame: ObservableObject {
         model.cardsOnBoard
     }
     
+    var discardCards: [Card] {
+        model.discardCards
+    }
+    
+    var setFound: Int {
+        discardCards.count / 3
+    }
+    
     
     //MARK: - Intent
     func dealCards() {
-        model.drawCards()
+        model.dealCards()
+    }
+    
+    func removeMathedCards() {
+        model.removeMatchedCards()
     }
     
     func choose(_ card: Card) {
         model.choose(card)
+    }
+    
+    func newGame() {
+        model.newGame()
     }
 }
