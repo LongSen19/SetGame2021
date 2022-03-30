@@ -95,7 +95,7 @@ struct SetEngine {
         }
     }
     
-    mutating func setUpDeck() {
+    mutating func setUpDeck(){
         for shade in Card.Shade.allCases {
             for symbol in Card.Symbol.allCases {
                 for color in Card.Color.allCases {
